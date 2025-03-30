@@ -4,25 +4,26 @@ pipeline {
     environment {
         AWS_CREDENTIALS_ID = 'aws-credentials'
         S3_BUCKET = 's3chatbot.com'
-        BUILD_DIR = './build' // Updated path
+        BUILD_DIR = 's3chatbot-frontend/build' // Corrected path
+        REACT_APP_DIR = 's3chatbot-frontend' // Define the React app directory
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'your-git-repo-url'
+                git 'https://github.com/sandy4v/s3chatbot.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'cd s3chatbot-frontend && npm install' // Changed directory
+                sh "cd ${REACT_APP_DIR} && npm install"
             }
         }
 
         stage('Build') {
             steps {
-                sh 'cd s3chatbot-frontend && npm run build' // Changed directory
+                sh "cd ${REACT_APP_DIR} && npm run build"
             }
         }
 
