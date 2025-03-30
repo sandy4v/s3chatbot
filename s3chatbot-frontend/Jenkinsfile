@@ -28,34 +28,9 @@ pipeline {
             }
         }
 
-        stage('AWS CLI Version Check') {
-            steps {
-                sh 'aws --version'
-            }
-        }
-
-        stage('Test S3 Sync (Simplified)') {
+        stage('Deploy to S3') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                    // Simplified aws s3 sync command
-                    sh "aws s3 sync ${BUILD_DIR} s3://${S3_BUCKET} --region ${AWS_REGION}"
-                }
-            }
-        }
-
-        stage('Test S3 Sync (With Delete)') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                    // aws s3 sync command with --delete
-                    sh "aws s3 sync ${BUILD_DIR} s3://${S3_BUCKET} --delete --region ${AWS_REGION}"
-                }
-            }
-        }
-
-        stage('Test S3 Sync (With Delete and ACL)') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                    // aws s3 sync command with --delete and --acl public-read
                     sh "aws s3 sync ${BUILD_DIR} s3://${S3_BUCKET} --delete --acl public-read --region ${AWS_REGION}"
                 }
             }
