@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_CREDENTIALS_ID = 'aws-credentials'
+        S3_BUCKET = 's3chatbot.com'
+        BUILD_DIR = './build' // Updated path
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'your-git-repo-url'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'cd s3chatbot-frontend && npm install' // Changed directory
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'cd s3chatbot-frontend && npm run build' // Changed directory
+            }
+        }
+
+        stage('Deploy to S3') {
+            steps {
+                script {
+                    sh "aws s3 sync ${BUILD_DIR} s3://${S3_BUCKET} --delete --acl public-read --region your-aws-region"
+                }
+            }
+        }
+    }
+}
