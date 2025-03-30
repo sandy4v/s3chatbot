@@ -70,11 +70,11 @@ function App() {
           <div className="input-area"> {/* Container for the input area */}
             <input
               type="text"
-              placeholder="Ask any question"
+              placeholder="Ask any question to your own chatgpt"
               value={inputText}
               onChange={handleInputChange}
             />
-            <button onClick={sendMessage}>Ask ChatBot</button>
+            <button onClick={sendMessage}>Ask ChatBot a question</button>
           </div>
         </div>
       </header>
