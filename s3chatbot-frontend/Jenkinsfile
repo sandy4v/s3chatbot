@@ -6,6 +6,7 @@ pipeline {
         S3_BUCKET = 's3chatbot.com'
         BUILD_DIR = 's3chatbot-frontend/build' // Corrected path
         REACT_APP_DIR = 's3chatbot-frontend' // Define the React app directory
+        AWS_REGION = 'us-east-1' // Add your AWS region here!
     }
 
     stages {
@@ -28,10 +29,10 @@ pipeline {
             }
         }
 
-        stage('Deploy to S3') {
+    stage('Deploy to S3') {
             steps {
-                script {
-                    sh "aws s3 sync ${BUILD_DIR} s3://${S3_BUCKET} --delete --acl public-read --region your-aws-region"
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    sh "aws s3 sync s3chatbot-frontend/build s3://s3chatbot.com --delete --acl public-read --region your-aws-region"
                 }
             }
         }

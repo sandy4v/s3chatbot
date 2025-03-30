@@ -81,9 +81,14 @@ npm run build
     copy all the files and folder under the build directory to the s3 bucket and enable static web hosting
 
 ## Docker CICD Build
+    we will create our own docker image with npm and nodejs installed 
+    docker build -t jenkins-s3chatbot
     docker images
-    docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+    docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins-s3chatbot
+    
     http://localhost:8080/
     docker exec $(docker ps -q -f "ancestor=jenkins/jenkins:lts") cat /var/jenkins_home/secrets/initialAdminPassword
     docker ps -q -f "ancestor=jenkins/jenkins:lts"
+    docker stop < container id>
+    docker rm $(docker ps -aq)   # removes all the containers
 
