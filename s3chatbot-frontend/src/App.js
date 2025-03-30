@@ -15,7 +15,7 @@ function App() {
 
   // Function to handle changes in the input field
   const handleInputChange = (event) => {
-    setInputText(event.target.value); // Update the 'inputText' state with the current value of the input field
+    setInputText(event.target.value); // Update the 'inputText' state with the current value of the input field.
   };
 
   // Mock API function to simulate a backend API call
