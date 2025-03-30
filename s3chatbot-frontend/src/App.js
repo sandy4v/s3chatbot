@@ -58,7 +58,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" /> {/* Display the logo */}
-        <h2>My S3 Chatbot</h2> {/* Display the title */}
+        <h2>My S3 Chatbot Serverless</h2> {/* Display the title */}
         <div className="chat-container"> {/* Container for the chat interface */}
           <div className="message-list"> {/* Container for the list of messages */}
             {messages.map((message, index) => ( // Map over the 'messages' array to display each message
@@ -74,7 +74,7 @@ function App() {
               value={inputText}
               onChange={handleInputChange}
             />
-            <button onClick={sendMessage}>Ask ChatBot a question</button>
+            <button onClick={sendMessage}>Ask ChatBot anything</button>
           </div>
         </div>
       </header>
