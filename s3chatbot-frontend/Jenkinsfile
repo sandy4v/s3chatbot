@@ -4,15 +4,14 @@ pipeline {
     environment {
         AWS_CREDENTIALS_ID = 'aws-credentials'
         S3_BUCKET = 's3chatbot.com'
-        BUILD_DIR = 's3chatbot-frontend/build' // Corrected path
-        REACT_APP_DIR = 's3chatbot-frontend' // Define the React app directory
-        AWS_REGION = 'us-east-1' // Add your AWS region here!
+        BUILD_DIR = 's3chatbot-frontend/build'
+        REACT_APP_DIR = 's3chatbot-frontend'
+        AWS_REGION = 'us-east-1'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Removed the redundant git step
                 echo "Repository already checked out by Declarative Checkout SCM"
             }
         }
@@ -29,10 +28,35 @@ pipeline {
             }
         }
 
-    stage('Deploy to S3') {
+        stage('AWS CLI Version Check') {
+            steps {
+                sh 'aws --version'
+            }
+        }
+
+        stage('Test S3 Sync (Simplified)') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                    sh "aws s3 sync s3chatbot-frontend/build s3://s3chatbot.com --delete --acl public-read --region your-aws-region"
+                    // Simplified aws s3 sync command
+                    sh "aws s3 sync ${BUILD_DIR} s3://${S3_BUCKET} --region ${AWS_REGION}"
+                }
+            }
+        }
+
+        stage('Test S3 Sync (With Delete)') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    // aws s3 sync command with --delete
+                    sh "aws s3 sync ${BUILD_DIR} s3://${S3_BUCKET} --delete --region ${AWS_REGION}"
+                }
+            }
+        }
+
+        stage('Test S3 Sync (With Delete and ACL)') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    // aws s3 sync command with --delete and --acl public-read
+                    sh "aws s3 sync ${BUILD_DIR} s3://${S3_BUCKET} --delete --acl public-read --region ${AWS_REGION}"
                 }
             }
         }

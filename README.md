@@ -92,3 +92,13 @@ npm run build
     docker stop < container id>
     docker rm $(docker ps -aq)   # removes all the containers
 
+
+
+# Get an object (replace <object_key> with an actual object key)
+aws s3api get-object --bucket s3chatbot.com --key index.html --outfile /tmp/testfile
+
+# Put an object
+aws s3api put-object --bucket s3chatbot.com --key testobject.txt --body testobject.txt
+
+# Delete an object
+aws s3api delete-object --bucket s3chatbot.com --key testobject.txt
