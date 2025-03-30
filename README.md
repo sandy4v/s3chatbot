@@ -92,13 +92,9 @@ npm run build
     docker stop < container id>
     docker rm $(docker ps -aq)   # removes all the containers
 
+## Test CICD build
+In order for Jenkins build to be triggered automatically we need to create a webhook in Gethub
+but Github needs a public url for jenkins server  
+hence we will use ngrok - install it
+brew install ngrok # make a new account on ngrok to configure the auth key
 
-
-# Get an object (replace <object_key> with an actual object key)
-aws s3api get-object --bucket s3chatbot.com --key index.html --outfile /tmp/testfile
-
-# Put an object
-aws s3api put-object --bucket s3chatbot.com --key testobject.txt --body testobject.txt
-
-# Delete an object
-aws s3api delete-object --bucket s3chatbot.com --key testobject.txt
