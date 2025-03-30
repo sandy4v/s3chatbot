@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // Importing React and the useState hook for managing component state.
+import React, { useState } from 'react'; // Importing React and the useState hook for managing component state
 import logo from './awsaipro logo.png'; // Importing the logo image
 import './App.css'; // Importing the CSS file for styling
 
