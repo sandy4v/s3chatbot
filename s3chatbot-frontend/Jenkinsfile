@@ -11,7 +11,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/sandy4v/s3chatbot.git'
+                // Removed the redundant git step
+                echo "Repository already checked out by Declarative Checkout SCM"
             }
         }
 
