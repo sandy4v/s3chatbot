@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'jenkins-s3chatbot:latest'
-            args '--entrypoint=""' // Optional: Avoid entrypoint conflicts
-        }
-    }
+    agent any  // Runs directly on the Jenkins container
 
     stages {
         stage('Checkout') {
