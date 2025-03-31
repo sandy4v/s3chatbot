@@ -104,7 +104,7 @@ npm run build
 
 ## Docker CICD Build
     we will create our own docker image with npm and nodejs installed 
-    docker build -t jenkins-s3chatbot
+    docker build -t jenkins-s3chatbot .
     docker images
     docker run -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins-s3chatbot
     
@@ -114,6 +114,9 @@ npm run build
     docker stop < container id>
     docker rm $(docker ps -aq)   # removes all the containers
 
+    verify if terraform is installed inside docker container running 
+    docker exec -it <containerID> sh -c "terraform version"  
+    docker exec -it 75b182b85cd8 sh -c "terraform version" 
 ## Test CICD build
 In order for Jenkins build to be triggered automatically we need to create a webhook in Gethub
 but Github needs a public url for jenkins server  

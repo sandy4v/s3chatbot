@@ -1,5 +1,5 @@
 pipeline {
-    agent any  // Runs directly on the Jenkins container
+    agent { docker 'jenkins-s3chatbot:latest' }
 
     stages {
         stage('Checkout') {
@@ -9,12 +9,16 @@ pipeline {
         }
         stage('Terraform Init') {
             steps {
-                sh 'terraform init'
+                dir('IAC') {
+                    sh 'terraform init'
+                }
             }
         }
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan -no-color'
+                dir('IAC') {
+                    sh 'terraform plan -no-color'
+                }
             }
         }
         // More stages to come
