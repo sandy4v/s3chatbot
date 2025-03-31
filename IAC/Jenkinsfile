@@ -31,18 +31,16 @@ stage('Package Data Ingestion Lambda') {
     }
 }
 
-        stage('Package Bedrock Proxy Lambda') {
-            steps {
-                dir('IAC/bedrock_proxy_lambda') {
-                    sh '''
-                    mkdir -p package
-                    cp -r * package/
-                    cd package
-                    zip -r ../bedrock_proxy_lambda_payload.zip .
-                    '''
-                }
-            }
+stage('Package Bedrock Proxy Lambda') {
+    steps {
+        dir('IAC/bedrock_proxy_lambda') {
+            sh 'mkdir -p package'
+            sh 'cp lambda_function.py requirements.txt package/'  // Copy only necessary files
+            sh 'pip3 install -r requirements.txt -t package/'  // Install dependencies inside package/
+            sh 'cd package && zip -r ../bedrock_proxy_lambda_payload.zip .'  // Zip only package contents
         }
+    }
+}
 
         stage('Terraform Init') {
             steps {
