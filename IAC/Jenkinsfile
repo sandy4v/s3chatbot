@@ -1,10 +1,14 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'jenkins-s3chatbot:latest'
+        }
+    }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm // Or your specific SCM configuration
+                checkout scm
             }
         }
         stage('Terraform Init') {
@@ -17,6 +21,6 @@ pipeline {
                 sh 'terraform plan -no-color'
             }
         }
-        // We will add more stages later
+        // More stages to come
     }
 }
