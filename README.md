@@ -1,22 +1,31 @@
+Hi, I am creating an aws project and I need your help. please do not provide any code unless asked for. I have made significant progress and need your help to continue working on it. I can provide you details on everything that is done until now and we can continue after that. If there is any descripancy in code files. then please suggest updates as we go. I dont like to get entire code at once so will go step by step. is that ok? shoud I provide you the details on the project so far
+
 # s3chatbot
 AI chatbot on s3
 
-# Refactoring Streamlit App to AWS with React
+## Here's a summary of the architecture for a complete functional RAG application:
 
-This document outlines the steps to refactor a Streamlit Python application to AWS, utilizing React for the front end, S3 hosting, API Gateway, Lambda, and Bedrock.
-
-
-## Here's a summary of the architecture:
-
-React UI (S3): The user interacts with a React-based chat interface hosted on S3.
+React UI (S3): The user interacts with a React-based chat interface hosted as a static website on s3 bucket "s3chatbot.com"
 API Gateway: The React UI sends user queries to API Gateway via POST requests.
-Lambda Function: The API Gateway triggers a Lambda function. This Lambda function:
+2 Lambda functions - 
+First Lambda - data-ingestion - First lambda for creating chunks and faiss index to store it on another s3 bucket - sandeep-patharkar-faiss-store-bckt. the trigger will be when a pdf is uploaded on the source s3 bucket -sandeep-patharkar-gen-ai-bckt.  
+2nd Lambda Function: The API Gateway triggers this Lambda function bedrock_proxy. This Lambda function:
 Receives the user's query from API Gateway.
 Sends the query to Amazon Bedrock.
 Receives the response from Bedrock.
 Returns the response to API Gateway.
 Bedrock: Amazon Bedrock processes the user query and generates a response.
 Response: The API Gateway sends the response back to the React UI, which displays it to the user.
+
+Current process to build this -
+We have Jenkins running on a local docker container to build the cicd pipeline
+we are using Terraform to create the aws infrastructure and we do have some tf files written already.
+
+do you understand the project. Please ask for any clarifications before I provide you the actual code written so far
+
+
+let me give you my directory structure first. we have a git repo called "s3chatbot" inside this we have IAC folder for TF code, s3chatbot-frontend for our react code. uploading the files now wait
+
 
 ## 1. Develop the Lambda Function (Backend)
 
@@ -111,3 +120,21 @@ but Github needs a public url for jenkins server
 hence we will use ngrok - install it
 brew install ngrok # make a new account on ngrok to configure the auth key
 
+## after lambda creation and uploading file to s3 we will encounter this error
+[ERROR] Runtime.ImportModuleError: Unable to import module 'lambda_function': No module named 'langchain_community'
+Traceback (most recent call last): ### to resolve this error
+
+### for first lambda to resolve this error
+mkdir -p data_ingestion_lambda/python
+pip install -r data_ingestion_lambda/requirements.txt -t data_ingestion_lambda/python
+mv lambda_function.py /package
+zip -r ../data_ingestion_lambda_payload.zip package
+cd ..
+
+### for second lambda to resolve this error
+mkdir -p bedrock_proxy_lambda/package
+pip install -r bedrock_proxy_lambda/requirements.txt -t bedrock_proxy_lambda/package
+cd bedrock_proxy_lambda
+mv lambda_function.py /package
+zip -r ../bedrock_proxy_lambda_payload.zip package
+cd ..
