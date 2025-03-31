@@ -20,18 +20,16 @@ pipeline {
             }
         }
 
-        stage('Package Data Ingestion Lambda') {
-            steps {
-                dir('IAC/data_ingestion_lambda') {
-                    sh '''
-                    mkdir -p package
-                    cp -r * package/
-                    cd package
-                    zip -r ../data_ingestion_lambda_payload.zip .
-                    '''
-                }
-            }
+stage('Package Data Ingestion Lambda') {
+    steps {
+        dir('IAC/data_ingestion_lambda') {
+            sh 'mkdir -p package'
+            sh 'cp lambda_function.py requirements.txt package/'
+            sh 'pip3 install -r requirements.txt -t package/'
+            sh 'zip -r data_ingestion_lambda_payload.zip package/'
         }
+    }
+}
 
         stage('Package Bedrock Proxy Lambda') {
             steps {

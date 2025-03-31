@@ -18,13 +18,13 @@ data "aws_s3_bucket" "faiss_bucket" {
 data "archive_file" "data_ingestion_lambda_zip" {
   type        = "zip"
   output_path = "data_ingestion_lambda_payload.zip"  # The name of the ZIP file
-  source_dir  = "${path.module}/data_ingestion_lambda/package" # Point directly to the package directory
+  source_dir  = "${path.module}/data_ingestion_lambda" # Using the Lambda source directory directly
 }
 
 resource "aws_lambda_function" "data_ingestion_lambda" {
   function_name = "data-ingestion-lambda"
   description   = "Ingests data from S3, creates embeddings, and builds FAISS index"
-  handler       = "package.lambda_function.lambda_handler" # Updated handler
+  handler       = "data_ingestion_lambda.lambda_function.lambda_handler" # Updated handler
   runtime       = "python3.11"
   memory_size   = 2048
   timeout       = 300
@@ -39,11 +39,14 @@ resource "aws_lambda_function" "data_ingestion_lambda" {
       SOURCE_BUCKET   = "sandeep-patharkar-gen-ai-bckt"
       FAISS_BUCKET    = "sandeep-patharkar-faiss-store-bckt"
       BEDROCK_MODEL_ID = var.bedrock_embedding_model_arn # Using the variable for Bedrock model ID
-      # AWS_REGION       = var.aws_region # Removed as AWS Lambda provides this
     }
   }
 
-  depends_on = [data.archive_file.data_ingestion_lambda_zip]
+  layers = [
+    aws_lambda_layer_version.lambda_layer.arn  # Referencing the shared dependencies layer
+  ]
+
+  depends_on = [data.archive_file.data_ingestion_lambda_zip, aws_lambda_layer_version.lambda_layer]
 }
 
 # S3 Bucket Trigger for Lambda 1
