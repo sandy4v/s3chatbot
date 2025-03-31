@@ -1,0 +1,7 @@
+**/terraform/
+**/terraform
+*.tfstate
+*.tfstate.*
+.terraform*
+s3chatbot-frontend/node_modules/
+s3chatbot-frontend/build/

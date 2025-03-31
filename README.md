@@ -5,6 +5,19 @@ AI chatbot on s3
 
 This document outlines the steps to refactor a Streamlit Python application to AWS, utilizing React for the front end, S3 hosting, API Gateway, Lambda, and Bedrock.
 
+
+## Here's a summary of the architecture:
+
+React UI (S3): The user interacts with a React-based chat interface hosted on S3.
+API Gateway: The React UI sends user queries to API Gateway via POST requests.
+Lambda Function: The API Gateway triggers a Lambda function. This Lambda function:
+Receives the user's query from API Gateway.
+Sends the query to Amazon Bedrock.
+Receives the response from Bedrock.
+Returns the response to API Gateway.
+Bedrock: Amazon Bedrock processes the user query and generates a response.
+Response: The API Gateway sends the response back to the React UI, which displays it to the user.
+
 ## 1. Develop the Lambda Function (Backend)
 
 *   **Translate Streamlit Logic:** Convert the core logic from your Streamlit app that interacts with Bedrock into a Python Lambda function. This function should:
