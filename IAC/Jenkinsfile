@@ -1,5 +1,5 @@
 pipeline {
-    agent { docker 'jenkins-s3chatbot:latest' }
+    agent any // Runs directly on the Jenkins container
 
     stages {
         stage('Checkout') {
