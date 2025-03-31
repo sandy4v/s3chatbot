@@ -4,7 +4,7 @@
 data "archive_file" "lambda_function_zip" {
   type        = "zip"
   output_path = "lambda_function_payload.zip"  # The name of the ZIP file
-  source_dir  = "./IAC/bedrock_proxy_lambda/package" # Point directly to the package directory
+  source_dir  = "./bedrock_proxy_lambda/package" # Point directly to the package directory
 }
 
 # Create the Lambda function

@@ -18,7 +18,7 @@ data "aws_s3_bucket" "faiss_bucket" {
 data "archive_file" "data_ingestion_lambda_zip" {
   type        = "zip"
   output_path = "data_ingestion_lambda_payload.zip"  # The name of the ZIP file
-  source_dir  = "./IAC/data_ingestion_lambda/package" # Point directly to the package directory
+  source_dir  = "./data_ingestion_lambda/package" # Point directly to the package directory
 }
 
 resource "aws_lambda_function" "data_ingestion_lambda" {
