@@ -24,9 +24,8 @@ stage('Package Data Ingestion Lambda') {
     steps {
         dir('IAC/data_ingestion_lambda') {
             sh 'mkdir -p package'
-            sh 'cp lambda_function.py requirements.txt package/'
-            sh 'pip3 install -r requirements.txt -t package/'
-            sh 'zip -r data_ingestion_lambda_payload.zip package/'
+            sh 'cp data_ingestion_lambda.py package/'  // Copy only the Lambda function
+            sh 'cd package && zip -r ../data_ingestion_lambda_payload.zip .'  // Create ZIP package
         }
     }
 }
@@ -35,9 +34,8 @@ stage('Package Bedrock Proxy Lambda') {
     steps {
         dir('IAC/bedrock_proxy_lambda') {
             sh 'mkdir -p package'
-            sh 'cp lambda_function.py requirements.txt package/'  // Copy only necessary files
-            sh 'pip3 install -r requirements.txt -t package/'  // Install dependencies inside package/
-            sh 'cd package && zip -r ../bedrock_proxy_lambda_payload.zip .'  // Zip only package contents
+            sh 'cp bedrock_proxy_lambda.py package/'  // Copy only the Lambda function
+            sh 'cd package && zip -r ../bedrock_proxy_lambda_payload.zip .'  // Create ZIP package
         }
     }
 }
