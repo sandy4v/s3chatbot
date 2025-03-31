@@ -1,8 +1,6 @@
 pipeline {
     agent {
-        docker {
-            image 'jenkins-s3chatbot:latest'
-        }
+        docker 'jenkins-s3chatbot:latest'
     }
 
     stages {
