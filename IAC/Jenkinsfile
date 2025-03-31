@@ -1,5 +1,10 @@
 pipeline {
-    agent { docker 'jenkins-s3chatbot:latest' }
+    agent {
+        docker {
+            image 'jenkins-s3chatbot:latest'
+            args '--entrypoint=""' // Optional: Avoid entrypoint conflicts
+        }
+    }
 
     stages {
         stage('Checkout') {
