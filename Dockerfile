@@ -17,4 +17,7 @@ RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/s
     && apt-get update && apt-get install -y terraform \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install zip
+RUN apt-get update && apt-get install -y zip
+    
 USER jenkins

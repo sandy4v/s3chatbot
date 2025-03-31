@@ -20,6 +20,32 @@ pipeline {
             }
         }
 
+        stage('Package Data Ingestion Lambda') {
+            steps {
+                dir('IAC/data_ingestion_lambda') {
+                    sh '''
+                    mkdir -p package
+                    cp -r * package/
+                    cd package
+                    zip -r ../data_ingestion_lambda_payload.zip .
+                    '''
+                }
+            }
+        }
+
+        stage('Package Bedrock Proxy Lambda') {
+            steps {
+                dir('IAC/bedrock_proxy_lambda') {
+                    sh '''
+                    mkdir -p package
+                    cp -r * package/
+                    cd package
+                    zip -r ../bedrock_proxy_lambda_payload.zip .
+                    '''
+                }
+            }
+        }
+
         stage('Terraform Init') {
             steps {
                 dir('IAC') {
@@ -27,13 +53,13 @@ pipeline {
                 }
             }
         }
-        // stage('Terraform Plan') {
-        //     steps {
-        //         dir('IAC') {
-        //             sh 'terraform plan -no-color'
-        //         }
-        //     }
-        // }
-        // More stages to come
+
+        stage('Terraform Apply') {
+            steps {
+                dir('IAC') {
+                    sh 'terraform apply -auto-approve'
+                }
+            }
+        }
     }
 }
