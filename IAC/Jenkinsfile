@@ -7,6 +7,19 @@ pipeline {
                 checkout scm
             }
         }
+
+        stage('Prepare Lambda Layer') {
+            steps {
+                dir('IAC/shared_dependencies') {
+                    sh '''
+                    mkdir -p python/lib/python3.9/site-packages
+                    pip install -r requirements.txt -t python/lib/python3.9/site-packages
+                    zip -r lambda_layer_payload.zip python
+                    '''
+                }
+            }
+        }
+
         stage('Terraform Init') {
             steps {
                 dir('IAC') {
@@ -14,13 +27,13 @@ pipeline {
                 }
             }
         }
-        stage('Terraform Plan') {
-            steps {
-                dir('IAC') {
-                    sh 'terraform plan -no-color'
-                }
-            }
-        }
+        // stage('Terraform Plan') {
+        //     steps {
+        //         dir('IAC') {
+        //             sh 'terraform plan -no-color'
+        //         }
+        //     }
+        // }
         // More stages to come
     }
 }
