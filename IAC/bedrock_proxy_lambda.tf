@@ -12,7 +12,7 @@ data "archive_file" "bedrock_proxy_lambda_zip" {
 resource "aws_lambda_function" "bedrock_proxy_lambda" {
   function_name = "bedrock-proxy-lambda"
   description   = "Proxy to interact with AWS Bedrock"
-  handler       = "bedrock_proxy_lambda.lambda_function.lambda_handler" # Updated handler
+  handler       = "bedrock_proxy_lambda.bedrock_proxy_lambda.lambda_handler" # Updated handler
   runtime       = "python3.11"
   memory_size   = 2048
   timeout       = 300

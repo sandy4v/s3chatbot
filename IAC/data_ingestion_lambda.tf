@@ -24,7 +24,7 @@ data "archive_file" "data_ingestion_lambda_zip" {
 resource "aws_lambda_function" "data_ingestion_lambda" {
   function_name = "data-ingestion-lambda"
   description   = "Ingests data from S3, creates embeddings, and builds FAISS index"
-  handler       = "data_ingestion_lambda.lambda_function.lambda_handler" # Updated handler
+  handler       = "data_ingestion_lambda.data_ingestion_lambda.lambda_handler" # Updated handler
   runtime       = "python3.11"
   memory_size   = 2048
   timeout       = 300
