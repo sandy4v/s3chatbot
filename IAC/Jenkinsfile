@@ -24,7 +24,7 @@ stage('Package Data Ingestion Lambda') {
     steps {
         dir('IAC/data_ingestion_lambda') {
             sh 'mkdir -p package'
-            sh 'cp ../data_ingestion_lambda.py package/'  // Copy only the Lambda function
+            sh 'cp ../../data_ingestion_lambda.py package/'  // Copy only the Lambda function
             sh 'cd package && zip -r ../data_ingestion_lambda_payload.zip .'  // Create ZIP package
         }
     }
@@ -34,7 +34,7 @@ stage('Package Bedrock Proxy Lambda') {
     steps {
         dir('IAC/bedrock_proxy_lambda') {
             sh 'mkdir -p package'
-            sh 'cp ../bedrock_proxy_lambda.py package/'  // Copy only the Lambda function
+            sh 'cp ../../bedrock_proxy_lambda.py package/'  // Copy only the Lambda function
             sh 'cd package && zip -r ../bedrock_proxy_lambda_payload.zip .'  // Create ZIP package
         }
     }
