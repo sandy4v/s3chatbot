@@ -141,3 +141,26 @@ cd bedrock_proxy_lambda
 mv lambda_function.py /package
 zip -r ../bedrock_proxy_lambda_payload.zip package
 cd ..
+
+
+
+Diagram (Conceptual):
+
++-----------------+   Internet   +-----------------+
+| React UI (S3)   | <----------> | API Gateway     |
++-----------------+              +-----------------+
+                                       | (VPC Link)
+                                       v
++-----------------+   Public Subnet   +-----------------+
+| ALB             | <----------> | Fargate (Query) |
++-----------------+                   +-----------------+
+                                       | (Private Subnet)
+                                       v
++-----------------+   Private Subnet  +-----------------+
+| Fargate (Index) | <----------> | Vector DB (OS/EC2)|
++-----------------+                   +-----------------+
+                                       |
+                                       v (VPC Endpoint)
++-----------------+                   +-----------------+
+| S3 (Data)       | <---------------> | Bedrock         |
++-----------------+                   +-----------------+

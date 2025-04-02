@@ -19,7 +19,7 @@ resource "aws_apigatewayv2_route" "chat_route" {
 resource "aws_apigatewayv2_integration" "bedrock_integration" { # Changed to bedrock_integration
   api_id             = aws_apigatewayv2_api.http_api.id
   integration_type   = "AWS_PROXY"
-  integration_uri    = aws_lambda_function.bedrock_proxy.invoke_arn # Ensure this matches your Lambda resource name
+  integration_uri    = aws_lambda_function.bedrock_proxy_lambda.invoke_arn # Ensure this matches your Lambda resource name
   payload_format_version = "2.0"
   credentials_arn = aws_iam_role.api_gateway_bedrock_role.arn # Ensure this matches your IAM role resource name
 }

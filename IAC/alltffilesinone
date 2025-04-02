@@ -1,0 +1,393 @@
+# iam.tf
+
+# IAM role for API Gateway to invoke the Lambda function
+resource "aws_iam_role" "api_gateway_bedrock_role" {
+  name = "APIGatewayBedrockRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "apigateway.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# IAM policy for API Gateway to invoke the Lambda function
+resource "aws_iam_policy" "api_gateway_bedrock_policy" {
+  name        = "APIGatewayBedrockPolicy"
+  description = "Allows API Gateway to invoke the Bedrock Lambda function"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "lambda:InvokeFunction",
+        Effect = "Allow",
+        Resource = aws_lambda_function.bedrock_proxy.arn # Ensure this matches your Lambda resource name
+      }
+    ]
+  })
+}
+
+# Attach the policy to the role
+resource "aws_iam_role_policy_attachment" "api_gateway_bedrock_attachment" {
+  role       = aws_iam_role.api_gateway_bedrock_role.name
+  policy_arn = aws_iam_policy.api_gateway_bedrock_policy.arn
+}
+
+# IAM role for the Bedrock proxy Lambda function
+resource "aws_iam_role" "bedrock_proxy_role" {
+  name = "BedrockProxyRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# IAM policy for the Bedrock proxy Lambda function to access Bedrock and CloudWatch
+resource "aws_iam_policy" "bedrock_proxy_policy" {
+  name        = "BedrockProxyPolicy"
+  description = "Allows the Bedrock Lambda function to access Bedrock and CloudWatch"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "bedrock-runtime:InvokeModel"
+        ],
+        Effect = "Allow",
+        Resource = [
+          var.bedrock_completion_model_arn
+        ]
+      },
+      {
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Effect = "Allow",
+        Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
+# Attach the policy to the role
+resource "aws_iam_role_policy_attachment" "bedrock_proxy_attachment" {
+  role       = aws_iam_role.bedrock_proxy_role.name
+  policy_arn = aws_iam_policy.bedrock_proxy_policy.arn
+}
+
+# IAM role for the Data Ingestion Lambda function
+resource "aws_iam_role" "lambda1_role" {
+  name = "DataIngestionLambdaRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# IAM policy for the Data Ingestion Lambda function
+resource "aws_iam_policy" "data_ingestion_policy" {
+  name        = "DataIngestionLambdaPolicy"
+  description = "Allows the Data Ingestion Lambda function to access S3, Bedrock, and CloudWatch"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ],
+        Effect = "Allow",
+        Resource = [
+          "arn:aws:s3:::sandeep-patharkar-gen-ai-bckt/*",
+          "arn:aws:s3:::sandeep-patharkar-faiss-store-bckt/*"
+        ]
+      },
+      {
+        Action = [
+          "bedrock-runtime:InvokeModel"
+        ],
+        Effect = "Allow",
+        Resource = [
+          var.bedrock_embedding_model_arn
+        ]
+      },
+      {
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Effect = "Allow",
+        Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
+# Attach the policy to the role
+resource "aws_iam_role_policy_attachment" "lambda1_attachment" {
+  role       = aws_iam_role.lambda1_role.name
+  policy_arn = aws_iam_policy.data_ingestion_policy.arn
+}
+
+#provider.tf
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+
+  required_version = ">= 0.13"
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+#terraform.tfvars
+s3_bucket_name = "s3chatbot.com"
+
+# variables.tf
+variable "aws_region" {
+  type        = string
+  default     = "us-east-1"
+  description = "The AWS region to deploy resources to."
+}
+
+variable "s3_bucket_name" {
+  type        = string
+  description = "The name of the S3 bucket."
+}
+
+variable "api_gateway_name" {
+  type        = string
+  default     = "S3APIGateway"
+  description = "The name of the API Gateway."
+}
+
+variable "api_gateway_stage_name" {
+  type        = string
+  default     = "dev"
+  description = "The name of the API Gateway stage."
+}
+
+variable "bedrock_completion_model_arn" {
+  type        = string
+  description = "ARN of the Bedrock model to be used for completion"
+  default     = "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-v2"
+}
+
+variable "bedrock_embedding_model_arn" {
+  type        = string
+  description = "ARN of the Bedrock model to be used for embeddings"
+  default     = "arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-embed-text-v1"
+}
+
+# apigateway.tf
+
+# Defines the HTTP API Gateway
+resource "aws_apigatewayv2_api" "http_api" {
+  name          = var.api_gateway_name
+  protocol_type = "HTTP"
+  # target        = aws_lambda_function.bedrock_proxy.invoke_arn # Removed this line
+  route_selection_expression = "$request.method $request.path"
+}
+
+# Route for POST requests to /chat
+resource "aws_apigatewayv2_route" "chat_route" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "POST /chat"  # Route for POST requests to /chat
+  target    = "integrations/${aws_apigatewayv2_integration.bedrock_integration.id}"
+}
+
+# Defines how the API Gateway integrates with the Lambda function
+resource "aws_apigatewayv2_integration" "bedrock_integration" { # Changed to bedrock_integration
+  api_id             = aws_apigatewayv2_api.http_api.id
+  integration_type   = "AWS_PROXY"
+  integration_uri    = aws_lambda_function.bedrock_proxy.invoke_arn # Ensure this matches your Lambda resource name
+  payload_format_version = "2.0"
+  credentials_arn = aws_iam_role.api_gateway_bedrock_role.arn # Ensure this matches your IAM role resource name
+}
+
+# Defines the default stage for the API Gateway
+resource "aws_apigatewayv2_stage" "default_stage" {
+  api_id     = aws_apigatewayv2_api.http_api.id
+  name       = "$default"
+  auto_deploy = true
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway_logs.arn
+    format          = jsonencode({
+      requestId               = "$context.requestId"
+      sourceIp                = "$context.identity.sourceIp"
+      requestTime             = "$context.requestTime"
+      httpMethod              = "$context.httpMethod"
+      routeKey                = "$context.routeKey"
+      status                  = "$context.status"
+      integrationErrorMessage = "$context.integrationErrorMessage"
+      errorMessage            = "$context.error.message"
+      extendedRequestId       = "$context.extendedRequestId"
+      responseLength          = "$context.responseLength"
+    })
+  }
+}
+
+# Defines a CloudWatch Log Group where API Gateway logs will be stored
+resource "aws_cloudwatch_log_group" "api_gateway_logs" {
+  name              = "/aws/api_gateway/${aws_apigatewayv2_api.http_api.name}"
+  retention_in_days = 7
+}
+
+#--------------------------------------------------------------------------------
+# Lambda Function 2: Bedrock Proxy Lambda
+#--------------------------------------------------------------------------------
+
+# Create the ZIP archive for the Lambda function
+data "archive_file" "bedrock_proxy_lambda_zip" {
+  type        = "zip"
+  output_path = "bedrock_proxy_lambda_payload.zip"  # The name of the ZIP file
+  source_dir  = "${path.module}/bedrock_proxy_lambda" # Using the Lambda source directory directly
+}
+
+resource "aws_lambda_function" "bedrock_proxy_lambda" {
+  function_name = "bedrock-proxy-lambda"
+  description   = "Proxy to interact with AWS Bedrock"
+  handler       = "bedrock_proxy_lambda.bedrock_proxy_lambda.lambda_handler" # Updated handler
+  runtime       = "python3.11"
+  memory_size   = 2048
+  timeout       = 300
+  role          = aws_iam_role.lambda2_role.arn  # Using the newly created IAM role
+
+  # Use the ZIP archive created by the archive_file data source
+  filename      = data.archive_file.bedrock_proxy_lambda_zip.output_path
+  source_code_hash = data.archive_file.bedrock_proxy_lambda_zip.output_base64sha256
+
+  environment {
+    variables = {
+      BEDROCK_MODEL_ID = var.bedrock_embedding_model_arn # Using the variable for Bedrock model ID
+      # Add other environment variables here as needed
+    }
+  }
+
+  layers = [
+    aws_lambda_layer_version.lambda_layer.arn  # Referencing the shared dependencies layer
+  ]
+
+  depends_on = [data.archive_file.bedrock_proxy_lambda_zip, aws_lambda_layer_version.lambda_layer]
+}
+
+# Allow necessary permissions for Lambda (if needed)
+resource "aws_lambda_permission" "allow_api_gateway_invoke" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.bedrock_proxy_lambda.function_name
+  principal     = "apigateway.amazonaws.com"
+  depends_on = [aws_lambda_function.bedrock_proxy_lambda] # Added explicit dependency
+}
+
+#--------------------------------------------------------------------------------
+# Data Sources (S3 Buckets)
+#--------------------------------------------------------------------------------
+
+data "aws_s3_bucket" "source_bucket" {
+  bucket = "sandeep-patharkar-gen-ai-bckt"
+}
+
+data "aws_s3_bucket" "faiss_bucket" {
+  bucket = "sandeep-patharkar-faiss-store-bckt"
+}
+
+#--------------------------------------------------------------------------------
+# Lambda Function 1: Data Ingestion and FAISS Index Creation
+#--------------------------------------------------------------------------------
+
+# Create the ZIP archive for the Lambda function
+data "archive_file" "data_ingestion_lambda_zip" {
+  type        = "zip"
+  output_path = "data_ingestion_lambda_payload.zip"  # The name of the ZIP file
+  source_dir  = "${path.module}/data_ingestion_lambda" # Using the Lambda source directory directly
+}
+
+resource "aws_lambda_function" "data_ingestion_lambda" {
+  function_name = "data-ingestion-lambda"
+  description   = "Ingests data from S3, creates embeddings, and builds FAISS index"
+  handler       = "data_ingestion_lambda.data_ingestion_lambda.lambda_handler" # Updated handler
+  runtime       = "python3.11"
+  memory_size   = 2048
+  timeout       = 300
+  role          = aws_iam_role.lambda1_role.arn  # Using the newly created IAM role
+
+  # Use the ZIP archive created by the archive_file data source
+  filename      = data.archive_file.data_ingestion_lambda_zip.output_path
+  source_code_hash = data.archive_file.data_ingestion_lambda_zip.output_base64sha256
+
+  environment {
+    variables = {
+      SOURCE_BUCKET   = "sandeep-patharkar-gen-ai-bckt"
+      FAISS_BUCKET    = "sandeep-patharkar-faiss-store-bckt"
+      BEDROCK_MODEL_ID = var.bedrock_embedding_model_arn # Using the variable for Bedrock model ID
+    }
+  }
+
+  layers = [
+    aws_lambda_layer_version.lambda_layer.arn  # Referencing the shared dependencies layer
+  ]
+
+  depends_on = [data.archive_file.data_ingestion_lambda_zip, aws_lambda_layer_version.lambda_layer]
+}
+
+# S3 Bucket Trigger for Lambda 1
+resource "aws_s3_bucket_notification" "s3_trigger" {
+  bucket = data.aws_s3_bucket.source_bucket.bucket
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.data_ingestion_lambda.arn
+    events       = ["s3:ObjectCreated:*"]
+    filter_suffix = ".pdf" # Assuming you want to trigger only on PDF files
+  }
+
+  depends_on = [aws_lambda_function.data_ingestion_lambda] # Uncommenting as suggested earlier
+}
+
+# Allow S3 to invoke the Lambda function
+resource "aws_lambda_permission" "allow_s3_invoke" {
+  statement_id  = "AllowS3Invoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.data_ingestion_lambda.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = data.aws_s3_bucket.source_bucket.arn
+  depends_on = [aws_lambda_function.data_ingestion_lambda] # Added explicit dependency
+}
+

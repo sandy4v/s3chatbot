@@ -21,7 +21,7 @@ resource "aws_iam_role" "api_gateway_bedrock_role" {
 # IAM policy for API Gateway to invoke the Lambda function
 resource "aws_iam_policy" "api_gateway_bedrock_policy" {
   name        = "APIGatewayBedrockPolicy"
-  description = "Allows API Gateway to invoke the Bedrock Lambda function"
+  description = "Allows API Gateway to invoke Lambda functions" # Updated description
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -29,7 +29,7 @@ resource "aws_iam_policy" "api_gateway_bedrock_policy" {
       {
         Action = "lambda:InvokeFunction",
         Effect = "Allow",
-        Resource = aws_lambda_function.bedrock_proxy.arn # Ensure this matches your Lambda resource name
+        Resource = "*" # Allow invoking any Lambda function
       }
     ]
   })
