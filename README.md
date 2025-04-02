@@ -164,3 +164,7 @@ Diagram (Conceptual):
 +-----------------+                   +-----------------+
 | S3 (Data)       | <---------------> | Bedrock         |
 +-----------------+                   +-----------------+
+
+
+git checkout -b bedrock  # Create and switch to the 'bedrock' branch.
+Made a change in Bedrock branch.
